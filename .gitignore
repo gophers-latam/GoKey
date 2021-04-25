@@ -11,5 +11,13 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 .*.out
 
+# Template: https://www.toptal.com/developers/gitignore/api/go
+# -------------------------------------------------------------
+
+# Addons:
+
 # Jetbrains IDEs.
 .idea/
+
+# When using live-reload Air binary
+/tmp
