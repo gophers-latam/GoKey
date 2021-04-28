@@ -1,12 +1,17 @@
 package gokey
 
+import "time"
+
 // Operations contains all the basic operations for all the interactions with the data structure (cache).
 type Operations interface {
-	// get a value given a key.
-	get(key string) (string, error)
-	// upsert is for create/update operation in the cache. ttl should be expressed in millis.
-	// If 0, the entry will not expire.
-	upsert(key, value string, ttl int) (bool, error)
-	//delete a value given a key
+	// get returns a value and an optional error given a key.
+	get(key string) ([]byte, error)
+
+	// upsert is for create/update operation in the cache. If 0 or negative, the entry will not expire.
+	// Returns whether the entry was created with this operation or not (updated) and an optional error
+	upsert(key string, value []byte, ttl time.Duration) (bool, error)
+
+	// delete removes a value given a key.
+	// Returns whether the entry was deleted or not and an optional error
 	delete(key string) (bool, error)
 }
