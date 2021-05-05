@@ -12,8 +12,7 @@
 <!-- Describir en detalles como testeaste los cambios -->
 <!-- Incluir detalles del entorno de testeo en caso de que sea necesario -->
 
-
-## Screenshots (if appropriate)
+## Screenshots / capturas de pantalla (si es necesario)
 
 ## Tipo de cambio
 <!-- Que tipo de cambio hiciste? Pone una `x` en todos los casilleros que apliquen: -->
