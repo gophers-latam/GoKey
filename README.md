@@ -16,11 +16,15 @@ Para conjuntar información documentada y un canal de comunicación para indicac
 
 <br>
 
-## 🔗 [Guia de estilos para código Go](./styles-go.MD)
+## 🔗 [Guia de estilos para código Go](./docs/styles-go.MD)
 
 <br>
 
-## 🔗 [Código de Conducta para Contribuyentes](./CODE_OF_CONDUCT.md)
+## 🔗 [Commits convencionales](./docs/conv-commits.md)
+
+<br>
+
+## 🔗 [Código de Conducta para Contribuyentes](./docs/CODE_OF_CONDUCT.md)
 
 <br><br>
 
