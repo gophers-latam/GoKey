@@ -21,6 +21,7 @@ var (
 	ErrorEmptyKey = errors.New("The key cannot be empty")
 )
 
+// Get the values of the key, if this exists in the cache
 func (this *Cache) Get(key string) ([]byte, error) {
 	if isEmpty(key) {
 		return nil, ErrorEmptyKey
@@ -36,6 +37,8 @@ func (this *Cache) Get(key string) ([]byte, error) {
 	return nil, errors.New("This key has no related values")
 }
 
+// Upsert cache a new key pair or update an existing one
+// if ttl is equals to zero the key will not expire
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
 	if isEmpty(key) {
@@ -57,7 +60,6 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 		})
 
 	} else {
-		//if ttl is equals to zero the key will not expire
 		ttl = -1
 	}
 
