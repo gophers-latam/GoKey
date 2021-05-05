@@ -24,7 +24,7 @@ func (this *Cache) Get(key string) ([]byte, error) {
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
 	if key == "" {
-		return false, errors.New("The cannot be empty")
+		return false, errors.New("The key cannot be empty")
 	}
 
 	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
@@ -34,7 +34,7 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	}
 
 	if ttl < 0 {
-		return false, errors.New("The cannot be lower than 0")
+		return false, errors.New("Ttl cannot be lower than 0")
 
 	} else if ttl > 0 {
 		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
