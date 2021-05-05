@@ -15,16 +15,24 @@ type pair struct {
 }
 
 //implementation cheack on compilation time
-var _ Operations = (*Cache)(nil)
+var (
+	_ Operations = (*Cache)(nil)
+
+	ErrorEmptyKey = errors.New("The key cannot be empty")
+)
 
 func (this *Cache) Get(key string) ([]byte, error) {
+	if isEmpty(key) {
+		return nil, ErrorEmptyKey
+	}
+
 	return []byte(""), errors.New("not implemented")
 }
 
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
-	if key == "" {
-		return false, errors.New("The key cannot be empty")
+	if isEmpty(key) {
+		return false, ErrorEmptyKey
 	}
 
 	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
@@ -56,4 +64,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 
 func (this *Cache) Delete(key string) (bool, error) {
 	return false, errors.New("not implemented")
+}
+
+func isEmpty(key string) bool {
+	return key == ""
 }
