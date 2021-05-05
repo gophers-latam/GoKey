@@ -26,7 +26,14 @@ func (this *Cache) Get(key string) ([]byte, error) {
 		return nil, ErrorEmptyKey
 	}
 
-	return []byte(""), errors.New("not implemented")
+	keyEncrypted := generateMD5HashFromKey([]byte(key))
+	pair, exists := this.pairsSet[keyEncrypted]
+
+	if exists {
+		return pair.value, nil
+	}
+
+	return nil, errors.New("This key has no related values")
 }
 
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
