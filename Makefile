@@ -7,7 +7,7 @@ all: win32 win64 linux64
 win32:
 	GOOS=windows GOARCH=386 go build -o ./build/gokey_x32.exe ./cmd
 
-win64: 
+win64:
 	GOOS=windows GOARCH=amd64 go build -o ./build/gokey_x64.exe ./cmd
 
 linux64:
@@ -15,3 +15,6 @@ linux64:
 
 clean:
 	rm ./build/gokey_x32.exe && rm ./build/gokey_x64.exe && rm ./build/gokey
+
+test:
+	@go test -v $(shell go list ./... | grep -v /mocks/) -count=1
