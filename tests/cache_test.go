@@ -10,13 +10,13 @@ var operations gokey.Operations = new(gokey.Cache)
 
 func TestCacheUpsert(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), -1)
-	if err != nil {
-		t.Error(err.Error())
+	if err == nil {
+		t.Error("the ttl argument doesn't accept negative numbers.")
 	}
 
 	_, err = operations.Upsert("", []byte("value"), 1)
-	if err != nil {
-		t.Error(err.Error())
+	if err == nil {
+		t.Error("the key argument doesn't accept empty string.")
 	}
 
 	// case ok
