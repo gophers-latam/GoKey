@@ -15,3 +15,6 @@ linux64:
 
 clean:
 	rm ./build/gokey_x32.exe && rm ./build/gokey_x64.exe && rm ./build/gokey
+
+test:
+	@go test -v ./... -count=1
