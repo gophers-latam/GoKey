@@ -31,7 +31,7 @@ func TestCacheGet(t *testing.T) {
 		t.Error("expected no errors in Get method, got:", err)
 	}
 
-	if value != nil {
+	if value == nil {
 		t.Error("expected a value, got nil")
 	}
 }
