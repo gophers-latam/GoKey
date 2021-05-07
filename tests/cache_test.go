@@ -49,3 +49,19 @@ func TestCacheGetUnknowKey(t *testing.T) {
 		t.Error("expected 'no related values' error message, got nil")
 	}
 }
+
+func TestCacheDelete(t *testing.T) {
+	_, err := operations.Upsert("key", []byte("value"), 10)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err)
+	}
+
+	res, err := operations.Delete("key")
+	if err != nil {
+		t.Error("expected no errors in Delete method, got:", err)
+	}
+
+	if !res {
+		t.Error("expected true, got false")
+	}
+}
