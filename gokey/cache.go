@@ -14,7 +14,7 @@ type pair struct {
 	value []byte
 }
 
-//implementation cheack on compilation time
+//implementation check on compilation time
 var _ Operations = (*Cache)(nil)
 
 func (this *Cache) Get(key string) ([]byte, error) {
@@ -24,7 +24,7 @@ func (this *Cache) Get(key string) ([]byte, error) {
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
 	if key == "" {
-		return false, errors.New("The cannot be empty")
+		return false, errors.New("key name cannot be empty")
 	}
 
 	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
@@ -34,7 +34,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	}
 
 	if ttl < 0 {
-		return false, errors.New("The cannot be lower than 0")
+		// redis is: if (ttl < 0) ttl = 0;
+		return false, errors.New("ttl value cannot be lower than 0")
 
 	} else if ttl > 0 {
 		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
@@ -42,9 +43,11 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 		})
 
 	} else {
-		//if ttl is equals to zero the key will not expire
+		//if ttl is equals to zero-value the key will not expire
 		ttl = -1
 	}
+	// redis in generic command:  if (ttl == -1)
+	// golang use with functions time.Duration = -1
 
 	this.pairsSet[keyEncrypted] = pair{
 		ttl:   ttl,
