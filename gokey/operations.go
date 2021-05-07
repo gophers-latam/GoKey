@@ -7,7 +7,8 @@ type Operations interface {
 	// get returns a value and an optional error given a key.
 	Get(key string) ([]byte, error)
 
-	// upsert is for create/update operation in the cache. If 0 or negative, the entry will not expire.
+	// upsert is for create/update operation in the cache.
+	// ttl must be positive. If ttl is equal to 0, the entry will not expire.
 	// Returns whether the entry was created with this operation or not (updated) and an optional error
 	Upsert(key string, value []byte, ttl time.Duration) (bool, error)
 
