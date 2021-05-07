@@ -14,17 +14,34 @@ type pair struct {
 	value []byte
 }
 
-//implementation check on compilation time
-var _ Operations = (*Cache)(nil)
+var (
+	_ Operations = (*Cache)(nil)
 
+  ErrorEmptyKey = errors.New("The key cannot be empty")
+)
+
+// Get the values of the key, if this exists in the cache
 func (this *Cache) Get(key string) ([]byte, error) {
-	return []byte(""), errors.New("not implemented")
+	if isEmpty(key) {
+		return nil, ErrorEmptyKey
+	}
+
+	keyEncrypted := generateMD5HashFromKey([]byte(key))
+	pair, exists := this.pairsSet[keyEncrypted]
+
+	if exists {
+		return pair.value, nil
+	}
+
+	return nil, errors.New("This key has no related values")
 }
 
+// Upsert cache a new key pair or update an existing one
+// if ttl is equals to zero the key will not expire
 func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
-	if key == "" {
-		return false, errors.New("key name cannot be empty")
+	if isEmpty(key) {
+		return false, ErrorEmptyKey
 	}
 
 	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
@@ -43,7 +60,6 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 		})
 
 	} else {
-		//if ttl is equals to zero-value the key will not expire
 		ttl = -1
 	}
 	// redis in generic command:  if (ttl == -1)
@@ -59,4 +75,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 
 func (this *Cache) Delete(key string) (bool, error) {
 	return false, errors.New("not implemented")
+}
+
+func isEmpty(key string) bool {
+	return key == ""
 }
