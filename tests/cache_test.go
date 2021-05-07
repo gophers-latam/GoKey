@@ -10,13 +10,13 @@ var operations gokey.Operations = new(gokey.Cache)
 
 func TestCacheUpsert(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), -1)
-	if err == nil {
-		t.Error("the ttl argument doesn't accept negative numbers.")
+	if err != nil {
+		t.Error(err.Error())
 	}
-	_, err = operations.Upsert("", []byte("value"), -1)
 
-	if err == nil {
-		t.Error("the key argument doesn't accept empty string.")
+	_, err = operations.Upsert("", []byte("value"), 1)
+	if err != nil {
+		t.Error(err.Error())
 	}
 }
 
@@ -47,5 +47,10 @@ func TestCacheGetUnknowKey(t *testing.T) {
 	_, err := operations.Get("Key")
 	if err == nil {
 		t.Error("Expected 'no related values' error message, got nil")
+
+    // case ok
+	_, err = operations.Upsert("key", []byte("value"), 0)
+	if err != nil {
+		t.Error("here: unexpected error")
 	}
 }
