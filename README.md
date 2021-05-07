@@ -16,7 +16,7 @@ Para conjuntar información documentada y un canal de comunicación para indicac
 
 <br>
 
-## 🔗 [Guia de estilos para código Go](./docs/styles-go.MD)
+## 🔗 [Guia de estilos para código Go](./docs/styles-go.md)
 
 <br>
 
