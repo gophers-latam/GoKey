@@ -71,8 +71,18 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	return true, nil
 }
 
+// Delete removes a value given a key.
+// returns whether the entry was deleted or not and an optional error
 func (this *Cache) Delete(key string) (bool, error) {
-	return false, errors.New("not implemented")
+	_, err := this.Get(key)
+	if err != nil {
+		return false, err
+	}
+
+	keyEncrypted := generateMD5HashFromKey([]byte(key))
+	delete(this.pairsSet, keyEncrypted)
+
+	return true, nil
 }
 
 func isEmpty(key string) bool {
