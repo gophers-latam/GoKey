@@ -14,7 +14,6 @@ type pair struct {
 	value []byte
 }
 
-//implementation cheack on compilation time
 var (
 	_ Operations = (*Cache)(nil)
 
@@ -52,7 +51,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	}
 
 	if ttl < 0 {
-		return false, errors.New("ttl cannot be lower than 0")
+		// redis is: if (ttl < 0) ttl = 0;
+		return false, errors.New("ttl value cannot be lower than 0")
 
 	} else if ttl > 0 {
 		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
@@ -62,6 +62,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	} else {
 		ttl = -1
 	}
+	// redis in generic command:  if (ttl == -1)
+	// golang use with functions time.Duration = -1
 
 	this.pairsSet[keyEncrypted] = pair{
 		ttl:   ttl,
