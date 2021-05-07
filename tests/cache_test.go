@@ -23,29 +23,29 @@ func TestCacheUpsert(t *testing.T) {
 func TestCacheGet(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), 10)
 	if err != nil {
-		t.Error("Expected no errors in Upsert method, got:", err)
+		t.Error("expected no errors in Upsert method, got:", err)
 	}
 
 	value, err := operations.Get("key")
 	if err != nil {
-		t.Error("Expected no errors in Get method, got:", err)
+		t.Error("expected no errors in Get method, got:", err)
 	}
 
 	if value != nil {
-		t.Error("Expected a value, got nil")
+		t.Error("expected a value, got nil")
 	}
 }
 
 func TestCacheGetEmptyKey(t *testing.T) {
 	_, err := operations.Get("")
 	if err == nil {
-		t.Error("Expected empty key error message, got nil")
+		t.Error("expected empty key error message, got nil")
 	}
 }
 
 func TestCacheGetUnknowKey(t *testing.T) {
 	_, err := operations.Get("Key")
 	if err == nil {
-		t.Error("Expected 'no related values' error message, got nil")
+		t.Error("expected 'no related values' error message, got nil")
 	}
 }

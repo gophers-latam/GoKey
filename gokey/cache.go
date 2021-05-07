@@ -18,7 +18,7 @@ type pair struct {
 var (
 	_ Operations = (*Cache)(nil)
 
-	ErrorEmptyKey = errors.New("The key cannot be empty")
+	ErrorEmptyKey = errors.New("the key cannot be empty")
 )
 
 // Get the values of the key, if this exists in the cache
@@ -34,7 +34,7 @@ func (this *Cache) Get(key string) ([]byte, error) {
 		return pair.value, nil
 	}
 
-	return nil, errors.New("This key has no related values")
+	return nil, errors.New("this key has no related values")
 }
 
 // Upsert cache a new key pair or update an existing one
@@ -52,7 +52,7 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	}
 
 	if ttl < 0 {
-		return false, errors.New("Ttl cannot be lower than 0")
+		return false, errors.New("ttl cannot be lower than 0")
 
 	} else if ttl > 0 {
 		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
