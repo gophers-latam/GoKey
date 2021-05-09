@@ -44,17 +44,24 @@ func TestCacheGet(t *testing.T) {
 func TestCacheGetExpiredKey(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), 1*time.Second)
 	if err != nil {
-		t.Error("Expected no errors in Upsert method, got:", err.Error())
+		t.Error("expected no errors in Upsert method, got:", err.Error())
 	}
 	time.Sleep(1 * time.Second)
 
 	_, err = operations.Get("key")
 	if err == nil {
-		t.Error("Expected ErrExpiredKey, got: nil")
+		t.Error("expected ErrExpiredKey, got: nil")
 	}
 	if err != nil {
 		if !errors.Is(err, gokey.ErrExpiredKey) {
-			t.Error("Expected ErrExpiredKey, got:", err.Error())
+			t.Error("expected ErrExpiredKey, got:", err.Error())
+		}
+	}
+
+	_, err = operations.Get("key")
+	if err != nil {
+		if !errors.Is(err, gokey.ErrNoExistKey) {
+			t.Error("expected 'key does not exist' error message, got:", err.Error())
 		}
 	}
 }
