@@ -36,7 +36,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 		return nil, ErrNoExistKey
 	}
 
-	if time.Since(pair.createdAt) > pair.ttl {
+	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
 		delete(c.pairsSet, keyEncrypted)
 		return nil, ErrExpiredKey
 	}
@@ -52,7 +52,7 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 		return false, ErrEmptyKey
 	}
 
-	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
+	var keyEncrypted = generateMD5HashFromKey([]byte(key))
 
 	if c.pairsSet == nil {
 		c.pairsSet = make(map[string]pair)
