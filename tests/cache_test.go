@@ -1,7 +1,9 @@
 package tests
 
 import (
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/gophers-latam/GoKey/gokey"
 )
@@ -16,14 +18,14 @@ func TestCacheUpsert(t *testing.T) {
 	}
 
 	_, err = operations.Upsert("", []byte("value"), 1)
-	if err != nil {
+	if err == nil {
 		t.Error(err.Error())
 	}
 }
 
 // go test -run TestCacheGet -v
 func TestCacheGet(t *testing.T) {
-	_, err := operations.Upsert("key", []byte("value"), 10)
+	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
 	if err != nil {
 		t.Error("Expected no errors in Upsert method, got:", err.Error())
 	}
@@ -33,8 +35,27 @@ func TestCacheGet(t *testing.T) {
 		t.Error("Expected no errors in Get method, got:", err.Error())
 	}
 
-	if value != nil {
+	if value == nil {
 		t.Error("Expected a value, got nil")
+	}
+}
+
+// go test -run TestCacheGetExpiredKey -v
+func TestCacheGetExpiredKey(t *testing.T) {
+	_, err := operations.Upsert("key", []byte("value"), 1*time.Second)
+	if err != nil {
+		t.Error("Expected no errors in Upsert method, got:", err.Error())
+	}
+	time.Sleep(1 * time.Second)
+
+	_, err = operations.Get("key")
+	if err == nil {
+		t.Error("Expected ErrExpiredKey, got: nil")
+	}
+	if err != nil {
+		if !errors.Is(err, gokey.ErrExpiredKey) {
+			t.Error("Expected ErrExpiredKey, got:", err.Error())
+		}
 	}
 }
 
