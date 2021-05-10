@@ -21,13 +21,13 @@ var (
 )
 
 // Get the values of the key, if this exists in the cache
-func (this *Cache) Get(key string) ([]byte, error) {
+func (c *Cache) Get(key string) ([]byte, error) {
 	if isEmpty(key) {
 		return nil, ErrorEmptyKey
 	}
 
 	keyEncrypted := generateMD5HashFromKey([]byte(key))
-	pair, exists := this.pairsSet[keyEncrypted]
+	pair, exists := c.pairsSet[keyEncrypted]
 
 	if exists {
 		return pair.value, nil
@@ -38,7 +38,7 @@ func (this *Cache) Get(key string) ([]byte, error) {
 
 // Upsert cache a new key pair or update an existing one
 // if ttl is equals to zero the key will not expire
-func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
+func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
 	if isEmpty(key) {
 		return false, ErrorEmptyKey
@@ -46,8 +46,8 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 
 	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
 
-	if this.pairsSet == nil {
-		this.pairsSet = make(map[string]pair)
+	if c.pairsSet == nil {
+		c.pairsSet = make(map[string]pair)
 	}
 
 	if ttl < 0 {
@@ -56,7 +56,7 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 
 	} else if ttl > 0 {
 		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
-			delete(this.pairsSet, keyEncrypted)
+			delete(c.pairsSet, keyEncrypted)
 		})
 
 	} else {
@@ -65,7 +65,7 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	// redis in generic command:  if (ttl == -1)
 	// golang use with functions time.Duration = -1
 
-	this.pairsSet[keyEncrypted] = pair{
+	c.pairsSet[keyEncrypted] = pair{
 		ttl:   ttl,
 		value: []byte(value),
 	}
@@ -73,6 +73,20 @@ func (this *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, er
 	return true, nil
 }
 
-func (this *Cache) Delete(key string) (bool, error) {
-	return false, errors.New("not implemented")
+func (c *Cache) Delete(key string) (bool, error) {
+	if isEmpty(key) {
+		return false, ErrorEmptyKey
+	}
+
+	var keyEncrypted = generateMD5HashFromKey([]byte(key))
+
+	_, exists := c.pairsSet[keyEncrypted]
+
+	if exists {
+		delete(c.pairsSet, keyEncrypted)
+	} else {
+		return false, errors.New("key not found")
+	}
+
+	return true, nil
 }
