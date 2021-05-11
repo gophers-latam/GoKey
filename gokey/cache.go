@@ -19,7 +19,6 @@ var (
 	_ Operations = (*Cache)(nil)
 
 	ErrEmptyKey       = errors.New("key cannot be empty")
-	ErrExpiredKey     = errors.New("key expired")
 	ErrNoExistKey     = errors.New("key does not exist")
 	ErrNotImplemented = errors.New("not implemented")
 )
@@ -38,7 +37,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 
 	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
 		delete(c.pairsSet, keyEncrypted)
-		return nil, ErrExpiredKey
+		return nil, ErrNoExistKey
 	}
 
 	return pair.value, nil

@@ -53,7 +53,7 @@ func TestCacheGetExpiredKey(t *testing.T) {
 		t.Error("expected ErrExpiredKey, got: nil")
 	}
 	if err != nil {
-		if !errors.Is(err, gokey.ErrExpiredKey) {
+		if !errors.Is(err, gokey.ErrNoExistKey) {
 			t.Error("expected ErrExpiredKey, got:", err.Error())
 		}
 	}
