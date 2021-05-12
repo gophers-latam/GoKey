@@ -66,6 +66,19 @@ func TestCacheGetExpiredKey(t *testing.T) {
 	}
 }
 
+// go test -run TestCacheDelete -v
+func TestCacheDelete(t *testing.T) {
+	_, err := operations.Upsert("key", []byte("value"), 10)
+	if err != nil {
+		t.Error("Expected no errors in Upsert method, got:", err.Error())
+	}
+
+	_, err = operations.Delete("key")
+	if err != nil {
+		t.Error("Expected no errors in Delete method, got:", err.Error())
+	}
+}
+
 // go test -run TestCacheGetEmptyKey -v
 func TestCacheGetEmptyKey(t *testing.T) {
 	_, err := operations.Get("")

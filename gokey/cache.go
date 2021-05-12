@@ -31,6 +31,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 
 	keyEncrypted := generateMD5HashFromKey([]byte(key))
 	pair, exists := c.pairsSet[keyEncrypted]
+
 	if !exists {
 		return nil, ErrNoExistKey
 	}
@@ -57,6 +58,7 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 		c.pairsSet = make(map[string]pair)
 	}
 
+
 	// redis in generic command:  if (ttl == -1)
 	// golang use with functions time.Duration = -1
 	c.pairsSet[keyEncrypted] = pair{
@@ -69,5 +71,20 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 }
 
 func (c *Cache) Delete(key string) (bool, error) {
-	return false, ErrNotImplemented
+	if isEmpty(key) {
+		return false, ErrorEmptyKey
+	}
+
+	var keyEncrypted = generateMD5HashFromKey([]byte(key))
+
+	_, exists := c.pairsSet[keyEncrypted]
+
+	if exists {
+		delete(c.pairsSet, keyEncrypted)
+	} else {
+		return false, errors.New("key not found")
+	}
+
+	return true, nil
+
 }
