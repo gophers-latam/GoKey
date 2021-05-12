@@ -6,7 +6,7 @@ import (
 )
 
 //generateMD5HashFromKey is a hash generator function according to input(key)
-//using md5 algorith
+//using md5 algorithm
 func generateMD5HashFromKey(key []byte) string {
 	algorithm := md5.New()
 	algorithm.Write(key)

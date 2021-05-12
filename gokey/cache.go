@@ -10,30 +10,38 @@ type Cache struct {
 }
 
 type pair struct {
-	ttl   time.Duration
-	value []byte
+	ttl       time.Duration
+	createdAt time.Time
+	value     []byte
 }
 
 var (
 	_ Operations = (*Cache)(nil)
 
-	ErrorEmptyKey = errors.New("key cannot be empty")
+	ErrEmptyKey       = errors.New("key cannot be empty")
+	ErrNoExistKey     = errors.New("key does not exist")
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // Get the values of the key, if this exists in the cache
 func (c *Cache) Get(key string) ([]byte, error) {
 	if isEmpty(key) {
-		return nil, ErrorEmptyKey
+		return nil, ErrEmptyKey
 	}
 
 	keyEncrypted := generateMD5HashFromKey([]byte(key))
 	pair, exists := c.pairsSet[keyEncrypted]
 
-	if exists {
-		return pair.value, nil
+	if !exists {
+		return nil, ErrNoExistKey
 	}
 
-	return nil, errors.New("key has no related values")
+	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
+		delete(c.pairsSet, keyEncrypted)
+		return nil, ErrNoExistKey
+	}
+
+	return pair.value, nil
 }
 
 // Upsert cache a new key pair or update an existing one
@@ -41,33 +49,22 @@ func (c *Cache) Get(key string) ([]byte, error) {
 func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
 
 	if isEmpty(key) {
-		return false, ErrorEmptyKey
+		return false, ErrEmptyKey
 	}
 
-	var keyEncrypted string = generateMD5HashFromKey([]byte(key))
+	var keyEncrypted = generateMD5HashFromKey([]byte(key))
 
 	if c.pairsSet == nil {
 		c.pairsSet = make(map[string]pair)
 	}
 
-	if ttl < 0 {
-		// redis is: if (ttl < 0) ttl = 0;
-		return false, errors.New("ttl value cannot be lower than 0")
 
-	} else if ttl > 0 {
-		time.AfterFunc(time.Duration(ttl)*time.Millisecond, func() {
-			delete(c.pairsSet, keyEncrypted)
-		})
-
-	} else {
-		ttl = -1
-	}
 	// redis in generic command:  if (ttl == -1)
 	// golang use with functions time.Duration = -1
-
 	c.pairsSet[keyEncrypted] = pair{
-		ttl:   ttl,
-		value: []byte(value),
+		ttl:       ttl,
+		createdAt: time.Now(),
+		value:     value,
 	}
 
 	return true, nil
@@ -89,4 +86,5 @@ func (c *Cache) Delete(key string) (bool, error) {
 	}
 
 	return true, nil
+
 }
