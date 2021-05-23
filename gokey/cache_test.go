@@ -1,12 +1,10 @@
-package tests
+package gokey
 
 import (
 	"testing"
-
-	"github.com/gophers-latam/GoKey/gokey"
 )
 
-var operations gokey.Operations = new(gokey.Cache)
+var operations Operations = &Cache{pairsSet: map[string]pair{}}
 
 // go test -run TestCacheUpsert -v
 func TestCacheUpsert(t *testing.T) {
