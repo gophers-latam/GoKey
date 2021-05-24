@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/gophers-latam/GoKey/gokey"
+	"log"
 	"time"
+
+	"github.com/gophers-latam/GoKey/gokey"
 )
 
 func main() {
@@ -22,6 +24,15 @@ func main() {
 	}
 
 	fmt.Println(res)
+
+	time.Sleep(10 * time.Second)
+	res2, err := someGetOperation(client, "key")
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	fmt.Println(res2)
 }
 
 func someSaveOperation(c *gokey.Client, key, value string) error {
