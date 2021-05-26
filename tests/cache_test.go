@@ -42,11 +42,11 @@ func TestCacheGet(t *testing.T) {
 
 // go test -run TestCacheGetExpiredKey -v
 func TestCacheGetExpiredKey(t *testing.T) {
-	_, err := operations.Upsert("key", []byte("value"), 1*time.Second)
+	_, err := operations.Upsert("key", []byte("value"), 100*time.Millisecond)
 	if err != nil {
 		t.Error("expected no errors in Upsert method, got:", err.Error())
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	_, err = operations.Get("key")
 	if err == nil {
@@ -127,5 +127,73 @@ func TestUpsertSameKey(t *testing.T) {
 
 	if string(v) != newValue {
 		t.Errorf("got different value from cache. Expected: %s, got: %s", newValue, string(v))
+	}
+}
+
+func TestCacheExistsSomeKey(t *testing.T) {
+
+	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
+
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	exists, err := operations.Exists("key")
+
+	if err != nil {
+		t.Error("expected no errors in Exists method, got:", err.Error())
+	}
+
+	if !exists {
+		t.Error("expected it exists, got false")
+	}
+
+}
+
+func TestCacheExistsExpiredKey(t *testing.T) {
+
+	_, err := operations.Upsert("key", []byte("value"), 100*time.Millisecond)
+
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	_, err1 := operations.Exists("key")
+
+	if err1 == nil {
+		t.Error("expected ErrExpiredKey, got:", err1.Error())
+	}
+
+	if err1 != nil {
+		if !errors.Is(err1, gokey.ErrNoExistKey) {
+			t.Error("expected ErrExpiredKey, got:", err1.Error())
+		}
+	}
+}
+
+func TestCacheExistsEmptyKey(t *testing.T) {
+	_, err := operations.Exists("")
+	if err == nil {
+		t.Error("expected ErrEmptyKey message, got nil")
+	}
+}
+
+func TestCacheExistsUnknownKey(t *testing.T) {
+	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
+
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	exists, err1 := operations.Exists("yek")
+
+	if err1 == nil {
+		t.Error("expected ErrNoExistKey, got nil")
+	}
+
+	if exists {
+		t.Error("expected it doesn't exists, got true")
 	}
 }

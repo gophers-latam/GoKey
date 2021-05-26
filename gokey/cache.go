@@ -87,3 +87,22 @@ func (c *Cache) Delete(key string) (bool, error) {
 	return true, nil
 
 }
+
+func (c *Cache) Exists(key string) (bool, error) {
+	if isEmpty(key) {
+		return false, ErrEmptyKey
+	}
+
+	keyEncrypted := generateMD5HashFromKey([]byte(key))
+	pair, exists := c.pairsSet[keyEncrypted]
+
+	if !exists {
+		return false, ErrNoExistKey
+	}
+
+	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
+		return false, ErrNoExistKey
+	}
+
+	return true, nil
+}
