@@ -21,6 +21,7 @@ var (
 	ErrEmptyKey       = errors.New("key cannot be empty")
 	ErrNoExistKey     = errors.New("key does not exist")
 	ErrNotImplemented = errors.New("not implemented")
+	ErrExpiredKey     = errors.New("key has expired")
 )
 
 // Get the values of the key, if this exists in the cache
@@ -86,4 +87,23 @@ func (c *Cache) Delete(key string) (bool, error) {
 
 	return true, nil
 
+}
+
+func (c *Cache) Exists(key string) (bool, error) {
+	if isEmpty(key) {
+		return false, ErrEmptyKey
+	}
+
+	keyEncrypted := generateMD5HashFromKey([]byte(key))
+	pair, exists := c.pairsSet[keyEncrypted]
+
+	if !exists {
+		return false, ErrNoExistKey
+	}
+
+	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
+		return false, ErrExpiredKey
+	}
+
+	return true, nil
 }

@@ -14,4 +14,8 @@ type Operations interface {
 	// Delete removes a value given a key.
 	// Returns whether the entry was deleted or not and an optional error
 	Delete(key string) (bool, error)
+
+	// Exists checks if a key is registered.
+	// Returns true if it exists, false if not, and a optional error.
+	Exists(key string) (bool, error)
 }
