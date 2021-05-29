@@ -21,6 +21,7 @@ var (
 	ErrEmptyKey       = errors.New("key cannot be empty")
 	ErrNoExistKey     = errors.New("key does not exist")
 	ErrNotImplemented = errors.New("not implemented")
+	ErrExpiredKey     = errors.New("key has expired")
 )
 
 // Get the values of the key, if this exists in the cache
@@ -101,7 +102,7 @@ func (c *Cache) Exists(key string) (bool, error) {
 	}
 
 	if time.Since(pair.createdAt) > pair.ttl && pair.ttl != -1 {
-		return false, ErrNoExistKey
+		return false, ErrExpiredKey
 	}
 
 	return true, nil

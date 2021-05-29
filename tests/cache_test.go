@@ -82,8 +82,8 @@ func TestCacheDelete(t *testing.T) {
 // go test -run TestCacheGetEmptyKey -v
 func TestCacheGetEmptyKey(t *testing.T) {
 	_, err := operations.Get("")
-	if err == nil {
-		t.Error("expected empty key error message, got nil")
+	if err != nil {
+		t.Errorf("expected '%v' error message, got %v", gokey.ErrEmptyKey, err.Error())
 	}
 }
 
@@ -122,6 +122,7 @@ func TestUpsertSameKey(t *testing.T) {
 		t.Errorf("got different value from cache. Expected: %s, got: %s", value, string(v))
 	}
 
+	// ineffectual here
 	_, err = operations.Upsert(key, []byte(newValue), -1)
 	v, err = operations.Get(key)
 
@@ -130,70 +131,69 @@ func TestUpsertSameKey(t *testing.T) {
 	}
 }
 
+// go test -run TestCacheExistsSomeKey -v
 func TestCacheExistsSomeKey(t *testing.T) {
 
 	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
 
 	if err != nil {
-		t.Error("expected no errors in Upsert method, got:", err.Error())
+		t.Errorf("expected no errors in Upsert method, got: %v", err.Error())
 	}
 
 	exists, err := operations.Exists("key")
 
 	if err != nil {
-		t.Error("expected no errors in Exists method, got:", err.Error())
+		t.Errorf("expected no errors in Exists method, got: %v", err.Error())
 	}
 
 	if !exists {
-		t.Error("expected it exists, got false")
+		t.Errorf("expected it true, got: %v", exists)
 	}
 
 }
 
+// go test -run TestCacheExistsExpiredKey -v
 func TestCacheExistsExpiredKey(t *testing.T) {
 
 	_, err := operations.Upsert("key", []byte("value"), 100*time.Millisecond)
 
 	if err != nil {
-		t.Error("expected no errors in Upsert method, got:", err.Error())
+		t.Errorf("expected no errors in Upsert method, got: %v", err.Error())
 	}
 
 	time.Sleep(100 * time.Millisecond)
 
 	_, err1 := operations.Exists("key")
 
-	if err1 == nil {
-		t.Error("expected ErrExpiredKey, got:", err1.Error())
-	}
-
 	if err1 != nil {
 		if !errors.Is(err1, gokey.ErrNoExistKey) {
-			t.Error("expected ErrExpiredKey, got:", err1.Error())
+			t.Errorf("Ok. expected %v, got: %v", gokey.ErrExpiredKey, err1.Error())
 		}
 	}
 }
 
+// go test -run TestCacheExistsEmptyKey -v
 func TestCacheExistsEmptyKey(t *testing.T) {
 	_, err := operations.Exists("")
-	if err == nil {
-		t.Error("expected ErrEmptyKey message, got nil")
+	if err != nil {
+		t.Errorf("Ok. expected %v message, got %v", gokey.ErrEmptyKey, err.Error())
 	}
 }
 
+// go test -run TestCacheExistsUnknownKey -v
 func TestCacheExistsUnknownKey(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
 
 	if err != nil {
-		t.Error("expected no errors in Upsert method, got:", err.Error())
+		t.Errorf("expected no errors in Upsert method, got: %v", err.Error())
 	}
 
 	exists, err1 := operations.Exists("yek")
-
-	if err1 == nil {
-		t.Error("expected ErrNoExistKey, got nil")
+	if err1 != nil {
+		t.Errorf("Ok. expected ErrNoExistKey, got: %v", err1.Error())
 	}
 
-	if exists {
-		t.Error("expected it doesn't exists, got true")
+	if !exists {
+		t.Errorf("Ok. expected it doesn't exists, got %t", exists)
 	}
 }
