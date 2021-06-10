@@ -17,3 +17,33 @@ jobs:
     - name: Test
       run: go test ./gokey
 
+
+  test-cache-params:
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.16.x]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Test
+      run: |
+        cd tests
+        go test -run TestCacheUpsert -v
+        go test -run TestCacheGet -v
+        go test -run TestCacheGetExpiredKey -v
+        go test -run TestCacheDelete -v
+        go test -run TestCacheGetEmptyKey -v
+        go test -run TestCacheGetUnknownKey -v
+        go test -run TestUpsertSameKey -v
+        go test -run TestCacheExistsSomeKey -v
+        go test -run TestCacheExistsExpiredKey -v
+        go test -run TestCacheExistsEmptyKey -v
+        go test -run TestCacheExistsUnknownKey -v
+
+
