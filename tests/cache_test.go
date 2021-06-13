@@ -23,6 +23,31 @@ func TestCacheUpsert(t *testing.T) {
 	}
 }
 
+// go test -run TestCacheConcurrentUpsert -v
+func TestCacheConcurrentUpsert(t *testing.T) {
+	go operations.Upsert("key", []byte("value"), -1)
+	go operations.Upsert("key2", []byte("hello world"), -1)
+
+	time.Sleep(1000)
+
+	value, err := operations.Get("key")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	value2, err2 := operations.Get("key2")
+	if err2 != nil {
+		t.Error(err.Error())
+	}
+
+	res := string(value)
+	res2 := string(value2)
+
+	if res != "value" || res2 != "hello world" {
+		t.Error("error while concurrently accessing in the cache")
+	}
+}
+
 // go test -run TestCacheGet -v
 func TestCacheGet(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
