@@ -18,3 +18,6 @@ clean:
 
 test:
 	@go test -v $(shell go list ./... | grep -v /mocks/) -count=1
+
+fmt:
+	@gofmt -w .
