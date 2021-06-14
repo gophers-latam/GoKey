@@ -2,10 +2,12 @@ package gokey
 
 import (
 	"errors"
+	"sync"
 	"time"
 )
 
 type Cache struct {
+	sync.RWMutex
 	pairsSet map[string]pair //contains expiration time and value of a key
 }
 
@@ -30,6 +32,9 @@ func (c *Cache) Get(key string) ([]byte, error) {
 		return nil, ErrEmptyKey
 	}
 
+	c.RLock()
+	defer c.RUnlock()
+
 	keyEncrypted := generateMD5HashFromKey([]byte(key))
 	pair, exists := c.pairsSet[keyEncrypted]
 
@@ -53,6 +58,9 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 		return false, ErrEmptyKey
 	}
 
+	c.Lock()
+	defer c.Unlock()
+
 	var keyEncrypted = generateMD5HashFromKey([]byte(key))
 
 	if c.pairsSet == nil {
@@ -75,8 +83,10 @@ func (c *Cache) Delete(key string) (bool, error) {
 		return false, ErrEmptyKey
 	}
 
-	var keyEncrypted = generateMD5HashFromKey([]byte(key))
+	c.Lock()
+	defer c.Unlock()
 
+	var keyEncrypted = generateMD5HashFromKey([]byte(key))
 	_, exists := c.pairsSet[keyEncrypted]
 
 	if exists {
@@ -86,13 +96,15 @@ func (c *Cache) Delete(key string) (bool, error) {
 	}
 
 	return true, nil
-
 }
 
 func (c *Cache) Exists(key string) (bool, error) {
 	if isEmpty(key) {
 		return false, ErrEmptyKey
 	}
+
+	c.RLock()
+	defer c.RUnlock()
 
 	keyEncrypted := generateMD5HashFromKey([]byte(key))
 	pair, exists := c.pairsSet[keyEncrypted]
