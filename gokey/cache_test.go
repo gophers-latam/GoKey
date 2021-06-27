@@ -2,6 +2,7 @@ package gokey
 
 import (
 	"testing"
+	"time"
 )
 
 var operations Operations = &Cache{pairsSet: map[string]pair{}}
@@ -21,7 +22,7 @@ func TestCacheUpsert(t *testing.T) {
 
 // go test -run TestCacheGet -v
 func TestCacheGet(t *testing.T) {
-	_, err := operations.Upsert("key", []byte("value"), 10)
+	_, err := operations.Upsert("key", []byte("value"), 10*time.Second)
 	if err != nil {
 		t.Error("expected no errors in Upsert method, got:", err.Error())
 	}
@@ -63,7 +64,7 @@ func TestUpsertSameKey(t *testing.T) {
 	key := "key"
 	value := "value"
 	newValue := "newValue"
-	_, err := operations.Upsert(key, []byte(value), 0)
+	_, err := operations.Upsert(key, []byte(value), -1)
 
 	if err != nil {
 		t.Error("err should be nil", err)
@@ -79,7 +80,7 @@ func TestUpsertSameKey(t *testing.T) {
 		t.Errorf("got different value from cache. Expected: %s, got: %s", value, string(v))
 	}
 
-	_, err = operations.Upsert(key, []byte(newValue), 0)
+	_, err = operations.Upsert(key, []byte(newValue), -1)
 	v, err = operations.Get(key)
 
 	if string(v) != newValue {
