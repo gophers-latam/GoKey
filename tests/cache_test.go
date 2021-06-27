@@ -2,6 +2,8 @@ package tests
 
 import (
 	"errors"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,12 +27,21 @@ func TestCacheUpsert(t *testing.T) {
 
 // go test -run TestCacheConcurrentUpsert -v
 func TestCacheConcurrentUpsert(t *testing.T) {
-	go operations.Upsert("key", []byte("value"), -1)
-	go operations.Upsert("key2", []byte("hello world"), -1)
+	var wg sync.WaitGroup
 
-	time.Sleep(1000)
+	for i := 1; i <= 2; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			key := "key" + strconv.Itoa(i)
+			value := "value" + strconv.Itoa(i)
+			operations.Upsert(key, []byte(value), -1)
+		}(i)
+	}
 
-	value, err := operations.Get("key")
+	wg.Wait()
+
+	value, err := operations.Get("key1")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -43,32 +54,7 @@ func TestCacheConcurrentUpsert(t *testing.T) {
 	res := string(value)
 	res2 := string(value2)
 
-	if res != "value" || res2 != "hello world" {
-		t.Error("error while concurrently accessing in the cache")
-	}
-}
-
-// go test -run TestCacheConcurrentUpsert -v
-func TestCacheConcurrentUpsert(t *testing.T) {
-	go operations.Upsert("key", []byte("value"), -1)
-	go operations.Upsert("key2", []byte("hello world"), -1)
-
-	time.Sleep(1000)
-
-	value, err := operations.Get("key")
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	value2, err2 := operations.Get("key2")
-	if err2 != nil {
-		t.Error(err.Error())
-	}
-
-	res := string(value)
-	res2 := string(value2)
-
-	if res != "value" || res2 != "hello world" {
+	if res != "value1" || res2 != "value2" {
 		t.Error("error while concurrently accessing in the cache")
 	}
 }
@@ -116,6 +102,42 @@ func TestCacheGetExpiredKey(t *testing.T) {
 	}
 }
 
+// go test -run TestCacheConcurrentGet -v
+func TestCacheConcurrentGet(t *testing.T) {
+	var wg sync.WaitGroup
+
+	_, err := operations.Upsert("key1", []byte("value1"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	_, err = operations.Upsert("key2", []byte("value2"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	for i := 1; i <= 2; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			key := "key" + strconv.Itoa(i)
+			value, err := operations.Get(key)
+
+			t.Log(string(value))
+
+			if err != nil {
+				t.Error("expected no errors in Get method, got:", err.Error())
+			}
+
+			if value == nil {
+				t.Error("expected a value, got nil")
+			}
+		}(i)
+	}
+
+	wg.Wait()
+}
+
 // go test -run TestCacheDelete -v
 func TestCacheDelete(t *testing.T) {
 	_, err := operations.Upsert("key", []byte("value"), 10)
@@ -126,6 +148,43 @@ func TestCacheDelete(t *testing.T) {
 	_, err = operations.Delete("key")
 	if err != nil {
 		t.Error("Expected no errors in Delete method, got:", err.Error())
+	}
+}
+
+// go test -run TestCacheConcurrentDelete -v
+func TestCacheConcurrentDelete(t *testing.T) {
+	var wg sync.WaitGroup
+
+	_, err := operations.Upsert("key1", []byte("value1"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	_, err = operations.Upsert("key2", []byte("value2"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	for i := 1; i <= 2; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			key := "key" + strconv.Itoa(i)
+			_, err = operations.Delete(key)
+			if err != nil {
+				t.Error("Expected no errors in Delete method, got:", err.Error())
+			}
+		}(i)
+	}
+
+	wg.Wait()
+
+	for i := 1; i <= 2; i++ {
+		value, err := operations.Get("key" + strconv.Itoa(i))
+
+		if value != nil {
+			t.Error("expected nil, got:", err.Error())
+		}
 	}
 }
 
@@ -251,5 +310,47 @@ func TestCacheExistsUnknownKey(t *testing.T) {
 
 	if exists {
 		t.Errorf("Ok. expected it doesn't exists, got %t", exists)
+	}
+}
+
+// go test -run TestCacheConcurrentExists -v
+func TestCacheConcurrentExists(t *testing.T) {
+	var wg sync.WaitGroup
+
+	_, err := operations.Upsert("key1", []byte("value1"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	_, err = operations.Upsert("key2", []byte("value2"), 10*time.Second)
+	if err != nil {
+		t.Error("expected no errors in Upsert method, got:", err.Error())
+	}
+
+	for i := 1; i <= 2; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			key := "key" + strconv.Itoa(i)
+			exists, err := operations.Exists(key)
+
+			if err != nil {
+				t.Errorf("expected no errors in Exists method, got: %v", err.Error())
+			}
+
+			if !exists {
+				t.Errorf("expected it true, got: %v", exists)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+
+	for i := 1; i <= 2; i++ {
+		value, _ := operations.Get("key" + strconv.Itoa(i))
+
+		if value == nil {
+			t.Error("expected a value, got nil")
+		}
 	}
 }
