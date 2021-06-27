@@ -19,7 +19,32 @@ func TestCacheUpsert(t *testing.T) {
 
 	_, err = operations.Upsert("", []byte("value"), 1)
 	if err == nil {
+		t.Error("should be an error with empty key")
+	}
+}
+
+// go test -run TestCacheConcurrentUpsert -v
+func TestCacheConcurrentUpsert(t *testing.T) {
+	go operations.Upsert("key", []byte("value"), -1)
+	go operations.Upsert("key2", []byte("hello world"), -1)
+
+	time.Sleep(1000)
+
+	value, err := operations.Get("key")
+	if err != nil {
 		t.Error(err.Error())
+	}
+
+	value2, err2 := operations.Get("key2")
+	if err2 != nil {
+		t.Error(err.Error())
+	}
+
+	res := string(value)
+	res2 := string(value2)
+
+	if res != "value" || res2 != "hello world" {
+		t.Error("error while concurrently accessing in the cache")
 	}
 }
 
@@ -108,7 +133,9 @@ func TestCacheDelete(t *testing.T) {
 func TestCacheGetEmptyKey(t *testing.T) {
 	_, err := operations.Get("")
 	if err != nil {
-		t.Errorf("expected '%v' error message, got %v", gokey.ErrEmptyKey, err.Error())
+		if !errors.Is(err, gokey.ErrEmptyKey) {
+			t.Errorf("expected '%v' error message, got %v", gokey.ErrEmptyKey, err.Error())
+		}
 	}
 }
 
@@ -191,7 +218,7 @@ func TestCacheExistsExpiredKey(t *testing.T) {
 	_, err1 := operations.Exists("key")
 
 	if err1 != nil {
-		if !errors.Is(err1, gokey.ErrNoExistKey) {
+		if !errors.Is(err1, gokey.ErrExpiredKey) {
 			t.Errorf("Ok. expected %v, got: %v", gokey.ErrExpiredKey, err1.Error())
 		}
 	}
@@ -201,7 +228,9 @@ func TestCacheExistsExpiredKey(t *testing.T) {
 func TestCacheExistsEmptyKey(t *testing.T) {
 	_, err := operations.Exists("")
 	if err != nil {
-		t.Errorf("Ok. expected %v message, got %v", gokey.ErrEmptyKey, err.Error())
+		if !errors.Is(err, gokey.ErrEmptyKey) {
+			t.Errorf("expected '%v' error message, got %v", gokey.ErrEmptyKey, err.Error())
+		}
 	}
 }
 
@@ -215,10 +244,12 @@ func TestCacheExistsUnknownKey(t *testing.T) {
 
 	exists, err1 := operations.Exists("yek")
 	if err1 != nil {
-		t.Errorf("Ok. expected ErrNoExistKey, got: %v", err1.Error())
+		if !errors.Is(err1, gokey.ErrNoExistKey) {
+			t.Errorf("Ok. expected ErrNoExistKey, got: %v", err1.Error())
+		}
 	}
 
-	if !exists {
+	if exists {
 		t.Errorf("Ok. expected it doesn't exists, got %t", exists)
 	}
 }
