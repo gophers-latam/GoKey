@@ -71,7 +71,7 @@ func TestCacheGetExpiredKey(t *testing.T) {
 	if err != nil {
 		t.Error("expected no errors in Upsert method, got:", err.Error())
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(101 * time.Millisecond)
 
 	_, err = operations.Get("key")
 	if err == nil {
