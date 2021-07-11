@@ -1,4 +1,4 @@
-name: Release Egosystem proxys binaries
+name: Release gokey binaries
 
 on:
   release:
@@ -6,13 +6,13 @@ on:
 
 jobs:
   releases-matrix:
-    name: Release Go Binary
+    name: Release Go Binary amd64 & 386
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # build and publish in parallel
+        # build and publish in parallel: linux/amd64,windows/amd64,linux/darwin
         goos: [linux,windows,darwin]
-        goarch: [amd64,386,arm,arm64]
+        goarch: [amd64,386]
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -22,7 +22,26 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          project_path: "./cmd/gokey"
+          project_path: "./cmd/"
           binary_name: "gokey"
           ldflags: "-s -w"
-          extra_files: LICENSE Readme.md
+  releases-matrix-arm:
+      name: Release Go Binary arm
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          # build and publish in parallel: linux/arm
+          goos: [linux]
+          goarch: [arm]
+      steps:
+        - uses: actions/checkout@v2
+        - name: Run tests
+          run: go test -v -p=1 -timeout=0 ./...
+        - uses: wangyoucao577/go-release-action@v1.16
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            goos: ${{ matrix.goos }}
+            goarch: ${{ matrix.goarch }}
+            project_path: "./cmd/"
+            binary_name: "gokey"
+            ldflags: "-s -w"
