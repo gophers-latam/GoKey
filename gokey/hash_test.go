@@ -18,7 +18,7 @@ func TestGenerateMD5HashFromKey(t *testing.T) {
 	}
 
 	for _, v := range tests {
-		if out := generateMD5HashFromKey(v.input); out != v.output {
+		if out, err := generateMD5(v.input); err != nil || out != v.output {
 			t.Errorf("Find %s, expected %s", string(v.output), out)
 		}
 	}

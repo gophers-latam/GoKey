@@ -1,16 +1,20 @@
 package gokey
 
-import "time"
+import (
+	"time"
+)
 
 type Client struct {
 	cache Operations
 }
 
 func NewClient() *Client {
+	return newClient()
+}
+
+func newClient() *Client {
 	return &Client{
-		cache: &Cache{
-			pairsSet: make(map[string]pair),
-		},
+		cache: newCache(),
 	}
 }
 
