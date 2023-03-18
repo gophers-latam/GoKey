@@ -69,7 +69,7 @@ Refs #133
 ```
 refactor!: change API entirely, incompatible with last version
 
-Refactor to use the new Go features not available on version 1.16
+Refactor to use the new Go features not available on version 1.20
 ```
 ```
 docs: correct spelling of CHANGELOG

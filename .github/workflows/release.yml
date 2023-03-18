@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: go test -v -p=1 -timeout=0 ./...
-      - uses: wangyoucao577/go-release-action@v1.16
+      - uses: wangyoucao577/go-release-action@v1.20
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
@@ -37,7 +37,7 @@ jobs:
         - uses: actions/checkout@v2
         - name: Run tests
           run: go test -v -p=1 -timeout=0 ./...
-        - uses: wangyoucao577/go-release-action@v1.16
+        - uses: wangyoucao577/go-release-action@v1.20
           with:
             github_token: ${{ secrets.GITHUB_TOKEN }}
             goos: ${{ matrix.goos }}
