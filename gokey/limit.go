@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"flag"
-	"fmt"
 )
 
 const defaultTupleLimit int = 32   //bytes
@@ -42,8 +41,6 @@ func getLimitPairsSet() int {
 // if not greater than the limit setting
 func checkTupleLimit(value []byte) error {
 	// valTpl := []byte("32-byte-long-value")
-	fmt.Println(binary.Size(value))
-	fmt.Println(getLimitTupleValue())
 	if binary.Size(value) > getLimitTupleValue() {
 		return errors.New("cache tuple value size out of limit setting")
 	}
