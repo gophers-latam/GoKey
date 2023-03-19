@@ -27,8 +27,17 @@ De ser necesario para reuniones puede hacerse uso de los canales **#👥sala** y
 
 ## Avance etapas
 
-- [x] 1. ```Core funcionalidad base```
-
+- [] V1. ```Core funcionalidad base``` (WIP)
+* Agregar, leer, eliminar elementos.
+* Darle un tamaño determinado de entradas.
+* Opciones de configuración a la hora de crear la instancia del cache.
+* Funcionalidades de Set (agregar/eliminar uno/muchos valor(es), leer todos).
+* Cache eviction LIFO para que no exceda la capacidad máxima.
+* Estadisticas.
 <br><br>
-
+- [] V2. ``` Cache Distribuido ```
+* Opcion de guardado en disco.
+* Poder correr independientemente, no solo embebido.
+* Conexión TCP, GRPC y HTTP.
+* Shards/nodos.
 ### [Licencia MIT](./LICENSE)
