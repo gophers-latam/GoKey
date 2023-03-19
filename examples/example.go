@@ -17,6 +17,12 @@ func main() {
 		panic(err.Error())
 	}
 
+	errLimit := someSaveOperation(client, "key_limit", "more-than-32-byte-string-key-value-tuple")
+
+	if errLimit != nil {
+		panic(errLimit.Error())
+	}
+
 	res, err := someGetOperation(client, "key")
 
 	if err != nil {
