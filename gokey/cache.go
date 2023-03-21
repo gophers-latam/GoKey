@@ -70,12 +70,12 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 		return false, ErrEmptyKey
 	}
 
-	errPairs := checkPairsSetLimit(&c.pairsSet)
+	errPairs := c.checkPairsSetLimit(&c.pairsSet)
 	if errPairs != nil {
 		return false, errPairs
 	}
 
-	errTuple := checkTupleLimit(value)
+	errTuple := c.checkTupleMaxSize(value)
 	if errTuple != nil {
 		return false, errTuple
 	}
