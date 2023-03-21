@@ -30,7 +30,7 @@ var (
 func newCache() *Cache {
 	return &Cache{
 		RWMutex:  sync.RWMutex{},
-		pairsSet: make(map[string]tuple),
+		pairsSet: make(map[string]tuple, getLimitPairsSet()),
 		hashFn:   generateMD5,
 	}
 }
@@ -66,9 +66,18 @@ func (c *Cache) Get(key string) ([]byte, error) {
 // Upsert cache a new key pair or update an existing one
 // if ttl is equals to zero the key will not expire
 func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error) {
-
 	if isEmpty(key) {
 		return false, ErrEmptyKey
+	}
+
+	errPairs := c.checkPairsSetLimit(&c.pairsSet)
+	if errPairs != nil {
+		return false, errPairs
+	}
+
+	errTuple := c.checkTupleMaxSize(value)
+	if errTuple != nil {
+		return false, errTuple
 	}
 
 	c.Lock()
@@ -80,7 +89,7 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 	}
 
 	if c.pairsSet == nil {
-		c.pairsSet = make(map[string]tuple)
+		c.pairsSet = make(map[string]tuple, getLimitPairsSet())
 	}
 
 	// redis in generic command:  if (ttl == -1)
