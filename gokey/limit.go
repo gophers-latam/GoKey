@@ -14,12 +14,15 @@ var (
 	limitPairsSetting   = flag.Int("pairs", defaultPairsLimit, "Limit map pairs set size")
 )
 
+func InitFlags() {
+	flag.Parse()
+}
+
 // Set a custom limit by env arg or flag
 // set default if not defined on start up
 // default to 32
 func getTupleMaxSize() int {
 	// go run example.go -limit 50
-	flag.Parse()
 	if *tupleMaxSizeSetting > 0 {
 		return *tupleMaxSizeSetting
 	}
@@ -29,7 +32,6 @@ func getTupleMaxSize() int {
 
 func getLimitPairsSet() int {
 	// go run example.go -pairs 1000
-	flag.Parse()
 	if *limitPairsSetting > 0 {
 		return *limitPairsSetting
 	}

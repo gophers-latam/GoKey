@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
+	gokey.InitFlags()
 	client := gokey.NewClient()
-
 	err := someSaveOperation(client, "key", "1")
 
 	if err != nil {
