@@ -10,7 +10,7 @@ type Cache struct {
 	sync.RWMutex
 	pairsSet map[string]tuple //contains expiration time and value of a key
 
-	hashFn func([]byte) (string, error)
+	hashFn func([]byte) string
 }
 
 type tuple struct {
@@ -53,10 +53,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return nil, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	pair, exists := c.pairsSet[keyHashed]
 
@@ -92,10 +89,7 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 	c.Lock()
 	defer c.Unlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	if c.pairsSet == nil {
 		c.pairsSet = make(map[string]tuple, getLimitPairsSet())
@@ -120,10 +114,8 @@ func (c *Cache) Delete(key string) (bool, error) {
 	c.Lock()
 	defer c.Unlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
+
 	_, exists := c.pairsSet[keyHashed]
 
 	if exists {
@@ -143,10 +135,7 @@ func (c *Cache) Exists(key string) (bool, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	pair, exists := c.pairsSet[keyHashed]
 
