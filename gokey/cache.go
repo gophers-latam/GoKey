@@ -19,6 +19,12 @@ type tuple struct {
 	value     []byte
 }
 
+type Options struct {
+	maxSize int
+	aHast   string
+	tll     float64
+}
+
 var (
 	_ Operations = (*Cache)(nil)
 
@@ -27,11 +33,14 @@ var (
 	ErrExpiredKey = errors.New("key has expired")
 )
 
-func newCache() *Cache {
+func newCache(o ...Options) *Cache {
+	options := o[0]
+
+	hashFn := selectHash(options.aHast)
 	return &Cache{
 		RWMutex:  sync.RWMutex{},
-		pairsSet: make(map[string]tuple, getLimitPairsSet()),
-		hashFn:   generateMD5,
+		pairsSet: make(map[string]tuple, sizeLimit(options.maxSize)),
+		hashFn:   hashFn,
 	}
 }
 

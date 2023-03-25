@@ -2,28 +2,35 @@ package gokey
 
 import (
 	"crypto/md5"
-	"crypto/sha512"
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
+	"hash"
 )
+
+type closureHash func([]byte) (string, error)
 
 // generateMD5 is a hash generator function according to input(key)
 // using md5 algorithm.
-func generateMD5(key []byte) (string, error) {
-	algorithm := md5.New()
-	_, err := algorithm.Write(key)
-	if err != nil {
-		return "", err
+
+func selectHash(tHash string) closureHash {
+	switch tHash {
+	case "sha256":
+		return generateFromHash(sha256.New())
+	case "sha1":
+		return generateFromHash(sha1.New())
+	default:
+		return generateFromHash(md5.New())
 	}
-	return hex.EncodeToString(algorithm.Sum(nil)), nil
 }
 
-// generateSHA512
-func generateSHA512(input string) (string, error) {
-	hasher := sha512.New()
-	_, err := hasher.Write([]byte(input))
-	if err != nil {
-		return "", err
+func generateFromHash(algorithm hash.Hash) closureHash {
+
+	return func(key []byte) (string, error) {
+		algorithm.Reset()
+		// write never return error
+		algorithm.Write(key)
+
+		return hex.EncodeToString(algorithm.Sum(nil)), nil
 	}
-	hash := hasher.Sum(nil)
-	return hex.EncodeToString(hash), nil
 }

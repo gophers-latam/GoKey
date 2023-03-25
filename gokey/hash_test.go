@@ -16,7 +16,7 @@ func TestGenerateMD5HashFromKey(t *testing.T) {
 		{[]byte("earthquake"), "e9ad9c2394f7dc7b6a69fb43e52a7382"},
 		{[]byte("endeavor"), "c5f5aaefa43684051f6fa380eef4b59e"},
 	}
-
+	generateMD5 := selectHash("md5")
 	for _, v := range tests {
 		if out, err := generateMD5(v.input); err != nil || out != v.output {
 			t.Errorf("Find %s, expected %s", string(v.output), out)
