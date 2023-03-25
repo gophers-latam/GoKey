@@ -8,12 +8,10 @@ import (
 	"hash"
 )
 
-type closureHash func([]byte) (string, error)
-
 // generateMD5 is a hash generator function according to input(key)
 // using md5 algorithm.
 
-func selectHash(tHash string) closureHash {
+func selectHash(tHash string) func([]byte) string {
 	switch tHash {
 	case "sha256":
 		return generateFromHash(sha256.New())
@@ -24,13 +22,13 @@ func selectHash(tHash string) closureHash {
 	}
 }
 
-func generateFromHash(algorithm hash.Hash) closureHash {
+func generateFromHash(algorithm hash.Hash) func([]byte) string {
 
-	return func(key []byte) (string, error) {
+	return func(key []byte) string {
 		algorithm.Reset()
 		// write never return error
 		algorithm.Write(key)
 
-		return hex.EncodeToString(algorithm.Sum(nil)), nil
+		return hex.EncodeToString(algorithm.Sum(nil))
 	}
 }
