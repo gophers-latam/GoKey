@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var operations = newCache(Options{maxSize: 10, aHast: "sha256"})
+var operations = newCache()
 
 // go test -run TestCacheUpsert -v
 func TestCacheUpsert(t *testing.T) {
