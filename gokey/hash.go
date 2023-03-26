@@ -11,8 +11,8 @@ import (
 // generateMD5 is a hash generator function according to input(key)
 // using md5 algorithm.
 
-func selectHash(tHash string) func([]byte) string {
-	switch tHash {
+func selectHash(hash THash) func([]byte) string {
+	switch hash {
 	case "sha256":
 		return generateFromHash(sha256.New())
 	case "sha1":

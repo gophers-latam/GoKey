@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+type THash string
+
+var (
+	MD5    = THash("md5")
+	SHA256 = THash("sha256")
+	SHA1   = THash("sha1")
+)
+
 type Cache struct {
 	sync.RWMutex
 	pairsSet map[string]tuple //contains expiration time and value of a key
@@ -21,7 +29,7 @@ type tuple struct {
 
 type Options struct {
 	MaxSize int
-	AHast   string
+	AHast   THash
 	TTL     float64 // in Newcache or their methods?
 }
 

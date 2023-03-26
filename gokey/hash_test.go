@@ -52,9 +52,9 @@ func TestGenerateSha256HashFromKey(t *testing.T) {
 		{[]byte("earthquake"), "fa7835fc1c74a9e014c750a4f452b56f215702a9802d386a0560e5099da94fbb"},
 		{[]byte("endeavor"), "1cd38b20bf937895efffc247bd9b85abbacfc5bfe21bfc12a44efa47a1da2343"},
 	}
-	generateSha1 := selectHash("sha256")
+	generateSha256 := selectHash(SHA256)
 	for _, v := range tests {
-		if out := generateSha1(v.input); out != v.output {
+		if out := generateSha256(v.input); out != v.output {
 			t.Errorf("Find %s, expected %s", string(v.output), out)
 		}
 	}
