@@ -8,6 +8,7 @@ import (
 
 type THash string
 
+// constans to select type of hash algorithm, Example:Options{Ahash:MD5}
 var (
 	MD5    = THash("md5")
 	SHA256 = THash("sha256")
