@@ -22,7 +22,7 @@ type tuple struct {
 type Options struct {
 	maxSize int
 	aHast   string
-	tll     float64
+	tll     float64 // in Newcache or their methods?
 }
 
 var (
