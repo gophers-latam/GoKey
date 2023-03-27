@@ -6,17 +6,34 @@ import (
 	"time"
 )
 
+type THash string
+
+// constans to select type of hash algorithm, Example:Options{Ahash:MD5}
+var (
+	MD5    = THash("md5")
+	SHA256 = THash("sha256")
+	SHA1   = THash("sha1")
+)
+
 type Cache struct {
 	sync.RWMutex
 	pairsSet map[string]tuple //contains expiration time and value of a key
 
-	hashFn func([]byte) (string, error)
+	hashFn func([]byte) string
 }
 
 type tuple struct {
 	ttl       time.Duration
 	createdAt time.Time
 	value     []byte
+}
+
+// Options allow at user set properties of cache like
+// maxsize or hash algorithm
+type Options struct {
+	MaxSize int
+	AHast   THash
+	TTL     float64 // in Newcache or their methods?
 }
 
 var (
@@ -27,11 +44,20 @@ var (
 	ErrExpiredKey = errors.New("key has expired")
 )
 
-func newCache() *Cache {
+func newCache(o ...*Options) *Cache {
+	var options *Options
+
+	if len(o) < 1 || o[0] == nil {
+		options = &Options{}
+	} else {
+		options = o[0]
+	}
+
+	hashFn := selectHash(options.AHast)
 	return &Cache{
 		RWMutex:  sync.RWMutex{},
-		pairsSet: make(map[string]tuple, getLimitPairsSet()),
-		hashFn:   generateMD5,
+		pairsSet: make(map[string]tuple, sizeLimit(options.MaxSize)),
+		hashFn:   hashFn,
 	}
 }
 
@@ -44,10 +70,7 @@ func (c *Cache) Get(key string) ([]byte, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return nil, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	pair, exists := c.pairsSet[keyHashed]
 
@@ -83,10 +106,7 @@ func (c *Cache) Upsert(key string, value []byte, ttl time.Duration) (bool, error
 	c.Lock()
 	defer c.Unlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	if c.pairsSet == nil {
 		c.pairsSet = make(map[string]tuple, getLimitPairsSet())
@@ -111,10 +131,8 @@ func (c *Cache) Delete(key string) (bool, error) {
 	c.Lock()
 	defer c.Unlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
+
 	_, exists := c.pairsSet[keyHashed]
 
 	if exists {
@@ -134,10 +152,7 @@ func (c *Cache) Exists(key string) (bool, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	keyHashed, err := c.hashFn([]byte(key))
-	if err != nil {
-		return false, err
-	}
+	keyHashed := c.hashFn([]byte(key))
 
 	pair, exists := c.pairsSet[keyHashed]
 

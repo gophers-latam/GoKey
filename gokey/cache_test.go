@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var operations = newCache()
+var operations = newCache(&Options{AHast: MD5})
 
 // go test -run TestCacheUpsert -v
 func TestCacheUpsert(t *testing.T) {
