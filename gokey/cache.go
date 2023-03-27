@@ -28,6 +28,8 @@ type tuple struct {
 	value     []byte
 }
 
+// Options allow at user set properties of cache like
+// maxsize or hash algorithm
 type Options struct {
 	MaxSize int
 	AHast   THash
